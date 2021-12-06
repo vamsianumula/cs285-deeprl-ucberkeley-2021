@@ -253,7 +253,12 @@ class RL_Trainer(object):
 
     def do_relabel_with_expert(self, expert_policy, paths):
         raise NotImplementedError
-        # hw1/hw2, can ignore it b/c it's not used for this hw
+        # # hw1/hw2, can ignore it b/c it's not used for this hw
+        # for path in paths:
+        #     path["action"]= expert_policy.get_action(path["observation"])
+
+        # return paths
+
 
     ####################################
     ####################################

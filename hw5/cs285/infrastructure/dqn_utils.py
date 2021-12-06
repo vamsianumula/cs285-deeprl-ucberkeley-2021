@@ -328,57 +328,57 @@ class LinearSchedule(object):
         fraction  = min(float(t) / self.schedule_timesteps, 1.0)
         return self.initial_p + fraction * (self.final_p - self.initial_p)
 
-def compute_exponential_averages(variables, decay):
-    """Given a list of tensorflow scalar variables
-    create ops corresponding to their exponential
-    averages
-    Parameters
-    ----------
-    variables: [tf.Tensor]
-        List of scalar tensors.
-    Returns
-    -------
-    averages: [tf.Tensor]
-        List of scalar tensors corresponding to averages
-        of al the `variables` (in order)
-    apply_op: tf.runnable
-        Op to be run to update the averages with current value
-        of variables.
-    """
-    averager = tf.train.ExponentialMovingAverage(decay=decay)
-    apply_op = averager.apply(variables)
-    return [averager.average(v) for v in variables], apply_op
+# def compute_exponential_averages(variables, decay):
+#     """Given a list of tensorflow scalar variables
+#     create ops corresponding to their exponential
+#     averages
+#     Parameters
+#     ----------
+#     variables: [tf.Tensor]
+#         List of scalar tensors.
+#     Returns
+#     -------
+#     averages: [tf.Tensor]
+#         List of scalar tensors corresponding to averages
+#         of al the `variables` (in order)
+#     apply_op: tf.runnable
+#         Op to be run to update the averages with current value
+#         of variables.
+#     """
+#     averager = tf.train.ExponentialMovingAverage(decay=decay)
+#     apply_op = averager.apply(variables)
+#     return [averager.average(v) for v in variables], apply_op
 
-def minimize_and_clip(optimizer, objective, var_list, clip_val=10):
-    """Minimized `objective` using `optimizer` w.r.t. variables in
-    `var_list` while ensure the norm of the gradients for each
-    variable is clipped to `clip_val`
-    """
-    gradients = optimizer.compute_gradients(objective, var_list=var_list)
-    for i, (grad, var) in enumerate(gradients):
-        if grad is not None:
-            gradients[i] = (tf.clip_by_norm(grad, clip_val), var)
-    return optimizer.apply_gradients(gradients)
+# def minimize_and_clip(optimizer, objective, var_list, clip_val=10):
+#     """Minimized `objective` using `optimizer` w.r.t. variables in
+#     `var_list` while ensure the norm of the gradients for each
+#     variable is clipped to `clip_val`
+#     """
+#     gradients = optimizer.compute_gradients(objective, var_list=var_list)
+#     for i, (grad, var) in enumerate(gradients):
+#         if grad is not None:
+#             gradients[i] = (tf.clip_by_norm(grad, clip_val), var)
+#     return optimizer.apply_gradients(gradients)
 
-def initialize_interdependent_variables(session, vars_list, feed_dict):
-    """Initialize a list of variables one at a time, which is useful if
-    initialization of some variables depends on initialization of the others.
-    """
-    vars_left = vars_list
-    while len(vars_left) > 0:
-        new_vars_left = []
-        for v in vars_left:
-            try:
-                session.run(tf.variables_initializer([v]), feed_dict)
-            except tf.errors.FailedPreconditionError:
-                new_vars_left.append(v)
-        if len(new_vars_left) >= len(vars_left):
-            # This can happen if the variables all depend on each other, or more likely if there's
-            # another variable outside of the list, that still needs to be initialized. This could be
-            # detected here, but life's finite.
-            raise Exception("Cycle in variable dependencies, or extenrnal precondition unsatisfied.")
-        else:
-            vars_left = new_vars_left
+# def initialize_interdependent_variables(session, vars_list, feed_dict):
+#     """Initialize a list of variables one at a time, which is useful if
+#     initialization of some variables depends on initialization of the others.
+#     """
+#     vars_left = vars_list
+#     while len(vars_left) > 0:
+#         new_vars_left = []
+#         for v in vars_left:
+#             try:
+#                 session.run(tf.variables_initializer([v]), feed_dict)
+#             except tf.errors.FailedPreconditionError:
+#                 new_vars_left.append(v)
+#         if len(new_vars_left) >= len(vars_left):
+#             # This can happen if the variables all depend on each other, or more likely if there's
+#             # another variable outside of the list, that still needs to be initialized. This could be
+#             # detected here, but life's finite.
+#             raise Exception("Cycle in variable dependencies, or extenrnal precondition unsatisfied.")
+#         else:
+#             vars_left = new_vars_left
 
 def get_wrapper_by_name(env, classname):
     currentenv = env
